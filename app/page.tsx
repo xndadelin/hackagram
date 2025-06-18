@@ -4,6 +4,8 @@ import { useSlackAuth } from '@/utils/oauth/slack';
 import { useGetUser } from '@/utils/queries/getUser';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { Heart, MessageCircle, Bookmark, Share2, MoreHorizontal, Plus } from "lucide-react";
+import { Post } from '@/components/Post';
 
 export default function Home() {
   const { signInWithSlack } = useSlackAuth();
@@ -20,33 +22,20 @@ export default function Home() {
   }
   if (userData?.user) {
     return (
-
       <SidebarProvider>
-        <div className="grid grid-cols-[auto_1fr] min-h-screen">
+        <div className="grid grid-cols-[auto_1fr] w-full min-h-screen">
           <AppSidebar />
-          <main className="flex flex-col p-6">
-            <div className="flex items-center mb-6 gap-2">
+          <main className="flex flex-col items-center p-6">
+            <div className="w-full max-w-xl flex items-center mb-6 gap-2">
               <SidebarTrigger />
               <div className="h-5 w-px bg-border" />
               <h1 className="text-xl font-medium">Hackagram</h1>
             </div>
-
-            <div className="max-w-4xl">
-              <h2 className="text-2xl font-bold mb-6">Welcome, {userData.user.user_metadata?.full_name}</h2>
-              
-              <div className="space-y-6">
-                <div className="bg-[#ec3750]/20 p-6 rounded-lg border border-[#ec3750]/30 hover:bg-[#ec3750]/25 transition-colors">
-                  <h3 className="text-lg font-medium mb-4">Recent ativity</h3>
-                  <p>Your recent activity will appear here.</p>
-                </div>
-                
-                <div className="bg-[#ec3750]/20 p-6 rounded-lg border border-[#ec3750]/30 hover:bg-[#ec3750]/25 transition-colors">
-                  <h3 className="text-lg font-medium mb-4">Upcoming events</h3>
-                  <p>Stay tuned for upcoming Hack Club events.</p>
-                </div>
-              </div>
-            </div>
           </main>
+          
+          <div className="fixed bottom-6 right-6 z-10">
+            <Post />
+          </div>
         </div>
       </SidebarProvider>
     );
