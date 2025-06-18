@@ -80,51 +80,46 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent className="mt-2">
-            <SidebarMenu>
+            <nav className="space-y-1 px-2">
               {navItems.map((item) => {
                 const isActive = pathname === item.url || (item.url !== "/" && pathname.startsWith(item.url))
 
                 return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <Link 
-                        href={item.url} 
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-150 group",
-                          "hover:bg-[#ec3750]/20",
-                          isActive 
-                            ? "bg-[#ec3750]/20 text-[#ec3750] font-medium" 
-                            : "hover:text-[#ec3750]"
-                        )}
-                      >
-                        <item.icon className={cn(
-                          "h-4 w-4 transition-colors",
-                          isActive ? "text-[#ec3750]" : "text-gray-400 group-hover:text-[#ec3750]"
-                        )} />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <Link 
+                    key={item.title}
+                    href={item.url} 
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-md text-sm w-full",
+                      "transition-all duration-200",
+                      isActive 
+                        ? "bg-[#ec3750]/10 text-[#ec3750] font-medium" 
+                        : "text-gray-700 hover:bg-[#ec3750]/10 hover:text-[#ec3750]"
+                    )}
+                  >
+                    <item.icon className={cn(
+                      "h-4 w-4",
+                      isActive 
+                        ? "text-[#ec3750]" 
+                        : "text-gray-400"
+                    )} />
+                    <span>{item.title}</span>
+                  </Link>
                 )
               })}
-            </SidebarMenu>
+            </nav>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       
       <SidebarFooter className="mt-auto p-4">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={handleSignOut}
-              disabled={signOutLoading}
-              className="flex items-center justify-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium text-white bg-[#ec3750]/80 hover:bg-[#ec3750] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>{signOutLoading ? 'Signing out...' : 'Sign out'}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <button
+          onClick={handleSignOut}
+          disabled={signOutLoading}
+          className="flex items-center justify-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium text-white bg-[#ec3750]/80 hover:bg-[#ec3750] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>{signOutLoading ? 'Signing out...' : 'Sign out'}</span>
+        </button>
       </SidebarFooter>
     </Sidebar>
   )
