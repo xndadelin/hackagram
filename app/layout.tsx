@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
+import QueryProvider from "@/utils/QueryProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "HackSocial",
+  title: "Hackagram",
   description: "A social media platform for hack-clubbers",
 };
 
@@ -22,7 +23,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <QueryProvider>
+            {children}
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
