@@ -90,10 +90,10 @@ export function AppSidebar() {
                       <Link 
                         href={item.url} 
                         className={cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-150",
-                          "hover:bg-[#ec3750]/10",
+                          "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-150 group",
+                          "hover:bg-[#ec3750]/20",
                           isActive 
-                            ? "bg-[#ec3750]/10 text-[#ec3750] font-medium" 
+                            ? "bg-[#ec3750]/20 text-[#ec3750] font-medium" 
                             : "hover:text-[#ec3750]"
                         )}
                       >
