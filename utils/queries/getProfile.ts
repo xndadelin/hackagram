@@ -54,6 +54,6 @@ export const useProfile = (userId: string) => {
         throw error;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };

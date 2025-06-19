@@ -85,7 +85,7 @@ export default function ProfileSettings() {
       if (error) throw error;
       
       router.push(`/profile/${userData.user.id}`);
-      
+      window.location.reload();       
     } catch (error) {
       console.error("error updating profile:", error);
     } finally {
