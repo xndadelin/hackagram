@@ -66,13 +66,13 @@ export function AppSidebar() {
               className="h-16 w-16 rounded-full object-cover border-2 border-[#ec3750]/50"
             />
           ) : (
-            <div className="h-16 w-16 bg-gradient-to-br from-[#ec3750] to-[#ff9a9a] rounded-full flex items-center justify-center text-white font-bold text-xl">
+            <div className="h-16 w-16 bg-gradient-to-br from-[#ec3750] to-[#ff9a9a] rounded-full flex items-center justify-center text-primary font-bold text-xl">
               {fullName.charAt(0)}
             </div>
           )}
           <div className="text-center">
             <h3 className="font-medium text-sm">{fullName}</h3>
-            {userEmail && <p className="text-xs text-gray-400 mt-1">{userEmail}</p>}
+            {userEmail && <p className="text-xs text-muted-foreground mt-1">{userEmail}</p>}
           </div>
         </div>
       </SidebarHeader>
@@ -90,17 +90,17 @@ export function AppSidebar() {
                     href={item.url} 
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-md text-sm w-full",
-                      "transition-all duration-200",
+                      "transition-all duration-200 group",
                       isActive 
                         ? "bg-[#ec3750]/10 text-[#ec3750] font-medium" 
-                        : "text-gray-700 hover:bg-[#ec3750]/10 hover:text-[#ec3750]"
+                        : "hover:bg-[#ec3750]/10 hover:text-[#ec3750]"
                     )}
                   >
                     <item.icon className={cn(
                       "h-4 w-4",
                       isActive 
                         ? "text-[#ec3750]" 
-                        : "text-gray-400"
+                        : "text-muted-foreground group-hover:text-[#ec3750]"
                     )} />
                     <span>{item.title}</span>
                   </Link>
@@ -115,7 +115,7 @@ export function AppSidebar() {
         <button
           onClick={handleSignOut}
           disabled={signOutLoading}
-          className="flex items-center justify-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium text-white bg-[#ec3750]/80 hover:bg-[#ec3750] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium text-primary-foreground bg-[#ec3750]/80 hover:bg-[#ec3750] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <LogOut className="h-4 w-4" />
           <span>{signOutLoading ? 'Signing out...' : 'Sign out'}</span>
