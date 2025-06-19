@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Users, Code, Rocket, LogOut } from "lucide-react"
+import { Home, Users, Code, Rocket, LogOut, User } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -14,34 +14,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem
 } from "@/components/ui/sidebar"
-
-
-const navItems = [
-  {
-    title: "Home",
-    url: "/",
-    icon: Home,
-  },
-  {
-    title: "Community",
-    url: "/community",
-    icon: Users,
-  },
-  {
-    title: "Hackathons",
-    url: "/hackathons",
-    icon: Rocket,
-  },
-  {
-    title: "Projects",
-    url: "/projects",
-    icon: Code,
-  }
-]
 
 export function AppSidebar() {
   const pathname = usePathname()
@@ -50,6 +23,36 @@ export function AppSidebar() {
   const avatarUrl = userData?.user?.user_metadata?.avatar_url
   const fullName = userData?.user?.user_metadata?.full_name || 'Hack Clubber'
   const userEmail = userData?.user?.email || ''
+  const userId = userData?.user?.id || ''
+  
+  const navItems = [
+    {
+      title: "Home",
+      url: "/",
+      icon: Home,
+    },
+    {
+      title: "Profile",
+      url: `/profile/${userId}`,
+      icon: User,
+      disabled: !userId
+    },
+    {
+      title: "Community",
+      url: "/community",
+      icon: Users,
+    },
+    {
+      title: "Hackathons",
+      url: "/hackathons",
+      icon: Rocket,
+    },
+    {
+      title: "Projects",
+      url: "/projects",
+      icon: Code,
+    }
+  ]
   
   const handleSignOut = async () => {
     await signOut()
@@ -82,18 +85,23 @@ export function AppSidebar() {
           <SidebarGroupContent className="mt-2">
             <nav className="space-y-1 px-2">
               {navItems.map((item) => {
-                const isActive = pathname === item.url || (item.url !== "/" && pathname.startsWith(item.url))
+                const isActive = 
+                  pathname === item.url || 
+                  (item.url !== "/" && pathname.startsWith(item.url)) ||
+                  (item.url.includes('/profile/') && pathname.startsWith('/profile/'))
 
                 return (
                   <Link 
                     key={item.title}
-                    href={item.url} 
+                    href={item.disabled ? '#' : item.url}
+                    aria-disabled={item.disabled}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-md text-sm w-full",
                       "transition-all duration-200 group",
                       isActive 
                         ? "bg-[#ec3750]/10 text-[#ec3750] font-medium" 
-                        : "hover:bg-[#ec3750]/10 hover:text-[#ec3750]"
+                        : "hover:bg-[#ec3750]/10 hover:text-[#ec3750]",
+                      item.disabled && "opacity-50 pointer-events-none"
                     )}
                   >
                     <item.icon className={cn(

@@ -19,7 +19,11 @@ export function HeartButton({
   const [showConfetti, setShowConfetti] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [opacity, setOpacity] = useState(1);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    setLiked(!!initialState);
+  }, [initialState]);
 
   const handleClick = (e: React.MouseEvent) => {
     const newLikedState = !liked;
@@ -72,18 +76,19 @@ export function HeartButton({
 
   return (
     <>
-      <button
+      <div
         ref={buttonRef}
         onClick={handleClick}
-        className="relative hover:scale-110 transition-transform duration-200"
+        className="relative hover:scale-110 transition-transform duration-200 cursor-pointer"
       >
         <Heart
           fill={liked ? "#ec3750" : "none"}
           stroke={liked ? "#ec3750" : "currentColor"}
           size={size}
-          className={`transition-all duration-300 ${liked ? "scale-110" : "scale-100"}`}
+          className={`transition-all duration-300 ${liked ? "scale-110 text-[#ec3750]" : "scale-100"}`}
+          data-liked={liked ? "true" : "false"}
         />
-      </button>
+      </div>
 
       {showConfetti && (
         <div style={{

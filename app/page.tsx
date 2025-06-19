@@ -15,6 +15,7 @@ export default function Home() {
   const { data: userData, isLoading } = useGetUser();
   type PostType = {
     id: string;
+    user_id: string;
     caption?: string;
     created_at: string;
     files?: string[];
@@ -33,7 +34,6 @@ export default function Home() {
   
   const supabase = createClient();
   
-  
   useEffect(() => {
     if (userData?.user) {
       const fetchPosts = async () => {
@@ -45,7 +45,6 @@ export default function Home() {
             .order('created_at', { ascending: false });
             
           if (error) throw error;
-          
 
           const filteredPosts = data.filter(post => {
             return post.user_id === userData.user?.id;
@@ -158,17 +157,21 @@ export default function Home() {
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 border rounded-full flex items-center justify-center">
                             <span className="text-sm font-bold">
-                              <img
-                                src={post.profiles?.avatar_url || 'https://assets.hackclub.com/flag-standalone.svg'}
-                                alt="User avatar"
-                                className="w-full h-full rounded-full object-cover"
-                              />
+                              <a href={`/profile/${post.user_id}`}>
+                                <img
+                                  src={post.profiles?.avatar_url || 'https://assets.hackclub.com/flag-standalone.svg'}
+                                  alt="User avatar"
+                                  className="w-full h-full rounded-full object-cover"
+                                />
+                              </a>
                             </span>
                           </div>
                           <div>
-                            <p className="font-medium text-sm">
-                              {post.profiles?.full_name}
-                            </p>
+                            <a href={`/profile/${post.user_id}`} className="hover:underline">
+                              <p className="font-medium text-sm">
+                                {post.profiles?.full_name}
+                              </p>
+                            </a>
                             <p className="text-xs text-muted-foreground">Hack Club Member</p>
                           </div>
                         </div>
@@ -216,8 +219,14 @@ export default function Home() {
                               <Share2 className="h-6 w-6" />
                             </Button>
                           </div>
-                          <Button variant="ghost" size="icon" className="rounded-full">
-                            <Bookmark className="h-6 w-6" />
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="rounded-full"
+                          >
+                            <Bookmark 
+                              className="h-6 w-6"
+                            />
                           </Button>
                         </div>
                         
