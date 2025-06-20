@@ -13,6 +13,7 @@ import { useGetUser } from "@/utils/queries/getUser"
 import { useState, useEffect } from "react"
 import { Bookmark, MessageCircle } from "lucide-react"
 import { PostType } from "@/utils/queries/getPosts"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface PostDialogProps {
     post: PostType;
@@ -39,6 +40,7 @@ export const PostDialog = ({ post, children, onLikeToggle, open: controlledOpen,
     const { data: currentUserData } = useGetUser();
     const [comments, setComments] = useState<CommentType[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [loadingComments, setLoadingComments] = useState(true);
     const [internalOpen, setInternalOpen] = useState(false);
 
     const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -47,7 +49,7 @@ export const PostDialog = ({ post, children, onLikeToggle, open: controlledOpen,
     useEffect(() => {
         const fetchComments = async () => {
             if (post?.id) {
-                setIsLoading(true);
+                setLoadingComments(true);
                 try {
                     const { createClient } = await import('@/lib/supabase/client');
                     const supabase = createClient();

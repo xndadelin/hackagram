@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useRef, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import dynamic from 'next/dynamic';

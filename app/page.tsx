@@ -1,7 +1,8 @@
 "use client";
-import { Button } from '@/components/ui/button';
+
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client'
 import { useSlackAuth } from '@/utils/oauth/slack';
-import { useGetUser } from '@/utils/queries/getUser';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MessageCircle, Bookmark, Share2, MoreHorizontal, Heart } from "lucide-react";
@@ -9,8 +10,9 @@ import { Post } from '@/components/Post';
 import { PostDialog } from '@/components/PostDialog';
 import { HeartButton } from '@/components/HeartButton';
 import { ImageCarousel } from '@/components/ImageCarousel';
-import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { FollowSuggestions } from '@/components/FollowSuggestions';
+import { Button } from '@/components/ui/button';
+import { useGetUser } from '@/utils/queries/getUser';
 
 export default function Home() {
   const { signInWithSlack } = useSlackAuth();
@@ -156,19 +158,20 @@ export default function Home() {
         <div className="grid grid-cols-[auto_1fr] w-full min-h-screen">
           <AppSidebar />
           <main className="flex flex-col items-center p-6">
-            <div className="w-full max-w-xl flex items-center mb-3 gap-2">
+            <div className="w-full max-w-4xl flex items-center mb-3 gap-2">
               <SidebarTrigger />
               <div className="h-5 w-px bg-border" />
               <h1 className="text-xl font-medium">Hackagram</h1>
             </div>
             
-            <div className="w-full max-w-xl text-center mb-4">
+            <div className="w-full max-w-4xl text-center mb-4">
               <div className="text-xs text-muted-foreground">
                 <span>Pro tip: Double-click on any image to like it!</span>
               </div>
             </div>
             
-            <div className="w-full max-w-xl">
+            <div className="w-full max-w-4xl grid md:grid-cols-[2fr_1fr] gap-6">
+              {/* Main Feed */}
               <div className="space-y-6">
                 {loadingPosts ? (
                   <div className="flex justify-center py-8">
@@ -291,6 +294,11 @@ export default function Home() {
                     <p className="text-muted-foreground">No posts yet. Be the first to share!</p>
                   </div>
                 )}
+              </div>
+
+              {/* Follow Suggestions */}
+              <div className="hidden md:block">
+                <FollowSuggestions />
               </div>
             </div>
           </main>

@@ -10,6 +10,8 @@ export interface ProfileData {
   saved_posts: string[];
   post_count: number;
   saved_count: number;
+  followers_count: number;
+  following_count: number;
 }
 
 export const useProfile = (userId: string) => {
@@ -47,7 +49,9 @@ export const useProfile = (userId: string) => {
           website: userData?.website || "",
           saved_posts: userData?.saved_posts || [],
           post_count: postsData?.length || 0,
-          saved_count: userData?.saved_posts?.length || 0
+          saved_count: userData?.saved_posts?.length || 0,
+          followers_count: userData?.followers_count || 0,
+          following_count: userData?.following_count || 0
         };
       } catch (error) {
         console.error("Error loading profile:", error);
