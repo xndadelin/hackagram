@@ -8,17 +8,11 @@ import {
 import { VisuallyHidden } from "@/components/ui/visually-hidden"
 import { Input } from "@/components/ui/input"
 import { HeartButton } from "@/components/HeartButton"
+import { ImageCarousel } from "@/components/ImageCarousel"
 import { useGetUser } from "@/utils/queries/getUser"
 import { useState, useEffect } from "react"
 import { Bookmark, MessageCircle } from "lucide-react"
 import { PostType } from "@/utils/queries/getPosts"
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-} from "@/components/ui/carousel"
 
 interface PostDialogProps {
     post: PostType;
@@ -155,29 +149,11 @@ export const PostDialog = ({ post, children, onLikeToggle, open: controlledOpen,
                 </VisuallyHidden>
                 <div className="flex items-center justify-center h-[600px]">
                     {post.fileUrls && post.fileUrls.length > 0 ? (
-                        <Carousel className="w-full h-full">
-                            <CarouselContent className="h-full">
-                                {post.fileUrls.map((url, index) => (
-                                    <CarouselItem key={index} className="flex items-center justify-center h-full">
-                                        <img
-                                            src={url}
-                                            alt={`Post content ${index + 1}`}
-                                            className="h-full w-full object-cover"
-                                            onError={(e) => {
-                                                e.currentTarget.src = "https://assets.hackclub.com/flag-standalone.svg";
-                                                e.currentTarget.className = "h-32 w-32 p-4";
-                                            }}
-                                        />
-                                    </CarouselItem>
-                                ))}
-                            </CarouselContent>
-                            {post.fileUrls.length > 1 && (
-                                <>
-                                    <CarouselPrevious className="left-2" />
-                                    <CarouselNext className="right-2" />
-                                </>
-                            )}
-                        </Carousel>
+                        <ImageCarousel 
+                            images={post.fileUrls}
+                            aspectRatio="square"
+                            cropMode="cover"
+                        />
                     ) : (
                         <div className="h-32 w-32 flex items-center justify-center">
                             <img

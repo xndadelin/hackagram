@@ -4,10 +4,11 @@ import { useSlackAuth } from '@/utils/oauth/slack';
 import { useGetUser } from '@/utils/queries/getUser';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { MessageCircle, Bookmark, Share2, MoreHorizontal } from "lucide-react";
+import { MessageCircle, Bookmark, Share2, MoreHorizontal, Heart } from "lucide-react";
 import { Post } from '@/components/Post';
 import { PostDialog } from '@/components/PostDialog';
 import { HeartButton } from '@/components/HeartButton';
+import { ImageCarousel } from '@/components/ImageCarousel';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -33,6 +34,7 @@ export default function Home() {
 
   const [posts, setPosts] = useState<PostType[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
+  const [activeDoubleTapPostId, setActiveDoubleTapPostId] = useState<string | null>(null);
   
   const supabase = createClient();
   
@@ -87,7 +89,7 @@ export default function Home() {
           
           setPosts(transformedPosts || []);
         } catch (error) {
-          console.error('error fetching posts:', error);
+
         } finally {
           setLoadingPosts(false);
         }
@@ -136,7 +138,7 @@ export default function Home() {
       setPosts(newPosts);
       
     } catch (error) {
-      console.error('error updating like:', error);
+      
     }
   };
   
@@ -154,10 +156,16 @@ export default function Home() {
         <div className="grid grid-cols-[auto_1fr] w-full min-h-screen">
           <AppSidebar />
           <main className="flex flex-col items-center p-6">
-            <div className="w-full max-w-xl flex items-center mb-6 gap-2">
+            <div className="w-full max-w-xl flex items-center mb-3 gap-2">
               <SidebarTrigger />
               <div className="h-5 w-px bg-border" />
               <h1 className="text-xl font-medium">Hackagram</h1>
+            </div>
+            
+            <div className="w-full max-w-xl text-center mb-4">
+              <div className="text-xs text-muted-foreground">
+                <span>Pro tip: Double-click on any image to like it!</span>
+              </div>
             </div>
             
             <div className="w-full max-w-xl">
@@ -196,16 +204,20 @@ export default function Home() {
                         </Button>
                       </div>
                       
-                      <div className="aspect-square bg-muted flex items-center justify-center">
+                      <div className="aspect-square bg-muted flex items-center justify-center relative">
                         {post.fileUrls && post.fileUrls.length > 0 ? (
-                          <img
-                            src={post.fileUrls[0]}
-                            alt="Post content"
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src = "https://assets.hackclub.com/flag-standalone.svg";
-                              e.currentTarget.className = "h-32 w-32 p-4";
+                          <ImageCarousel 
+                            images={post.fileUrls}
+                            aspectRatio="square"
+                            cropMode="cover"
+                            onImageDoubleClick={() => {
+                              if (!post.liked) {
+                                handleLike(post.id, true);
+                                setActiveDoubleTapPostId(post.id);
+                                setTimeout(() => setActiveDoubleTapPostId(null), 1000);
+                              }
                             }}
+                            showLikeAnimation={activeDoubleTapPostId === post.id}
                           />
                         ) : (
                           <div className="h-32 w-32 flex items-center justify-center">
@@ -225,6 +237,7 @@ export default function Home() {
                               <HeartButton 
                                 size={24} 
                                 initialState={post.liked}
+                                enableDoubleClick={true}
                                 onToggle={(isLiked) => handleLike(post.id, isLiked)}
                               />
                             </Button>

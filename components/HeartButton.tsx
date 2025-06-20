@@ -8,12 +8,14 @@ interface HeartButtonProps {
   size?: number;
   initialState?: boolean;
   onToggle?: (isLiked: boolean) => void;
+  enableDoubleClick?: boolean;
 }
 
 export function HeartButton({
   size = 24,
   initialState = false,
-  onToggle
+  onToggle,
+  enableDoubleClick = false
 }: HeartButtonProps) {
   const [liked, setLiked] = useState(initialState);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -25,7 +27,7 @@ export function HeartButton({
     setLiked(!!initialState);
   }, [initialState]);
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleLikeAction = (e: React.MouseEvent) => {
     const newLikedState = !liked;
     setLiked(newLikedState);
 
@@ -43,6 +45,16 @@ export function HeartButton({
 
     if (onToggle) {
       onToggle(newLikedState);
+    }
+  };
+  
+  const handleClick = (e: React.MouseEvent) => {
+    handleLikeAction(e);
+  };
+  
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (enableDoubleClick && !liked) {
+      handleLikeAction(e);
     }
   };
 
@@ -79,6 +91,7 @@ export function HeartButton({
       <div
         ref={buttonRef}
         onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
         className="relative hover:scale-110 transition-transform duration-200 cursor-pointer"
       >
         <Heart

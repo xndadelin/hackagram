@@ -5,13 +5,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { MessageCircle, Settings, Grid3X3, Bookmark } from "lucide-react";
+import { MessageCircle, Settings, Grid3X3 } from "lucide-react";
 import { useGetUser } from "@/utils/queries/getUser";
 import { useLikePost } from "@/utils/mutations/likePost";
 import { useProfile } from "@/utils/queries/getProfile";
-import { useProfilePosts, useSavedPosts } from "@/utils/queries/getPosts";
+import { useProfilePosts } from "@/utils/queries/getPosts";
 import { HeartButton } from "@/components/HeartButton";
 import { PostDialog } from "@/components/PostDialog";
+import { ImageCarousel } from "@/components/ImageCarousel";
 import Link from "next/link";
 
 
@@ -24,15 +25,10 @@ export default function UserProfile() {
     profileId, 
     currentUserData?.user?.id
   );
-  const { data: savedPosts = [], isLoading: isSavedPostsLoading } = useSavedPosts(
-    currentUserData?.user?.id === profileId ? profileId : ''
-  );
   
-  const [activeTab, setActiveTab] = useState("posts");
   const [openPostId, setOpenPostId] = useState<string | null>(null);
   
-  const loading = isProfileLoading || isProfilePostsLoading || 
-    (activeTab === 'saved' && currentUserData?.user?.id === profileId && isSavedPostsLoading);
+  const loading = isProfileLoading || isProfilePostsLoading;
   
   const likePostMutation = useLikePost();
   
@@ -47,7 +43,7 @@ export default function UserProfile() {
       });
       
     } catch (error) {
-      console.error("error updating like:", error);
+      
     }
   };
   
@@ -154,33 +150,20 @@ export default function UserProfile() {
             </div>
             
             <div className="border-t">
-              <div className="flex">
-                <button 
-                  className={`flex items-center gap-2 py-3 px-6 ${activeTab === 'posts' ? 'border-t-2 border-[#ec3750] text-foreground font-medium' : 'text-muted-foreground'}`}
-                  onClick={() => setActiveTab('posts')}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                  <span>Posts</span>
-                </button>
-                <button 
-                  className={`flex items-center gap-2 py-3 px-6 ${activeTab === 'saved' ? 'border-t-2 border-[#ec3750] text-foreground font-medium' : 'text-muted-foreground'}`}
-                  onClick={() => setActiveTab('saved')}
-                  disabled={profileData.id !== currentUserData?.user?.id}
-                >
-                  <Bookmark className="h-4 w-4" />
-                  <span>Saved</span>
-                  {profileData.saved_count > 0 && profileData.id === currentUserData?.user?.id && (
-                    <span className="ml-1 text-xs bg-muted px-1.5 py-0.5 rounded-full">
-                      {profileData.saved_count}
-                    </span>
-                  )}
-                </button>
+              <div className="flex flex-col">
+                <div className="flex">
+                  <div className="flex items-center gap-2 py-3 px-6 border-t-2 border-[#ec3750] text-foreground font-medium">
+                    <Grid3X3 className="h-4 w-4" />
+                    <span>Posts</span>
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground px-6 py-1">
+                  <span>Click on any post to view details</span>
+                </div>
               </div>
             </div>
             
-            {activeTab === 'posts' && (
-              <>
-                {profilePosts.length > 0 ? (
+            {profilePosts.length > 0 ? (
                   <div className="grid grid-cols-3 gap-1 md:gap-4 mt-4">
                     {profilePosts.map(post => (
                         <div key={post.id} className="aspect-square bg-muted relative group overflow-hidden cursor-pointer">
@@ -191,23 +174,28 @@ export default function UserProfile() {
                             onOpenChange={(isOpen) => setOpenPostId(isOpen ? post.id : null)}
                           >
                             <div 
-                              className="w-full h-full"
+                              className="w-full h-full aspect-square overflow-hidden"
                               onClick={() => setOpenPostId(post.id)}
                             >
-                              <img 
-                                src={post.fileUrls?.[0] || "https://assets.hackclub.com/flag-standalone.svg"} 
-                                alt="Post" 
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.src = "https://assets.hackclub.com/flag-standalone.svg";
-                                  e.currentTarget.className = "w-full h-full object-contain p-4";
-                                }}
-                              />
+                              {post.fileUrls && post.fileUrls.length > 0 ? (
+                                <ImageCarousel 
+                                  images={post.fileUrls}
+                                  aspectRatio="square"
+                                  cropMode="cover"
+                                />
+                              ) : (
+                                <img 
+                                  src="https://assets.hackclub.com/flag-standalone.svg"
+                                  alt="Post" 
+                                  className="w-full h-full object-contain p-4"
+                                />
+                              )}
                               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4 text-white">
                                 <div className="flex items-center">                            
                                   <HeartButton 
                                     size={20} 
                                     initialState={!!post.liked}
+                                    enableDoubleClick={false}
                                     onToggle={(isLiked) => {
                                       if (event) event.stopPropagation();
                                       handleLike(post.id, isLiked);
@@ -224,7 +212,7 @@ export default function UserProfile() {
                                   }}
                                 >
                                   <MessageCircle className="h-5 w-5" />
-                                  <span className="ml-1">0</span>
+                                  <span className="ml-1">{post.commentsCount || 0}</span>
                                 </div>
                               </div>
                             </div>
@@ -244,56 +232,6 @@ export default function UserProfile() {
                     <p className="text-muted-foreground">No posts yet</p>
                   </div>
                 )}
-              </>
-            )}
-            
-            {activeTab === 'saved' && (
-              <>
-                {savedPosts.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-1 md:gap-4 mt-4">
-                    {savedPosts.map(post => (
-                      <div key={post.id} className="aspect-square bg-muted relative group overflow-hidden">
-                        <img 
-                          src={post.fileUrls?.[0] || "https://assets.hackclub.com/flag-standalone.svg"} 
-                          alt="Post" 
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = "https://assets.hackclub.com/flag-standalone.svg";
-                            e.currentTarget.className = "w-full h-full object-contain p-4";
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4 text-white">
-                          <div className="flex items-center">
-                            <HeartButton 
-                              size={20} 
-                              initialState={!!post.liked} 
-                              onToggle={(isLiked) => handleLike(post.id, isLiked)}
-                              key={`heart-saved-${post.id}-${String(post.liked)}-${Date.now()}`}
-                            />
-                            <span className="ml-1">{post.likeCount}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <MessageCircle className="h-5 w-5" />
-                            <span className="ml-1">0</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-20 h-20 mx-auto mb-4 opacity-50">
-                      <img 
-                        src="https://assets.hackclub.com/flag-standalone.svg"
-                        alt="Hack Club" 
-                        className="w-full h-full"
-                      />
-                    </div>
-                    <p className="text-muted-foreground">No saved posts yet</p>
-                  </div>
-                )}
-              </>
-            )}
           </div>
         </main>
       </div>

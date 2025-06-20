@@ -77,7 +77,6 @@ export const usePosts = (userId?: string) => {
         
         return transformedPosts || [];
       } catch (error) {
-        console.error('error fetching posts:', error);
         throw error;
       }
     },
@@ -99,7 +98,6 @@ export const useProfilePosts = (profileId: string, currentUserId?: string) => {
           .single();
           
         if (profileError) {
-          console.error("error fetching profile:", profileError);
           return [];
         }
         
@@ -110,72 +108,35 @@ export const useProfilePosts = (profileId: string, currentUserId?: string) => {
           .order("created_at", { ascending: false });
           
         if (postsError) {
-          console.error("error fetching posts:", postsError);
           return [];
+        }
+
+        const postIds = postsData.map(post => post.id);
+        const { data: commentsData } = await supabase
+          .from('comments')
+          .select('post_id')
+          .in('post_id', postIds);
+          
+        const commentCounts: Record<string, number> = {};
+        if (commentsData) {
+          commentsData.forEach((comment: { post_id: string }) => {
+            commentCounts[comment.post_id] = (commentCounts[comment.post_id] || 0) + 1;
+          });
         }
         
         const profileDetails = {
-          full_name: profileData?.full_name || 'User',
+          full_name: profileData?.full_name,
           avatar_url: profileData?.avatar_url
         };
 
-        return postsData.map(post => 
-          transformPostData(post, currentUserId, profileDetails)
-        ) || [];
+        return postsData.map(post => {
+          const transformedPost = transformPostData(post, currentUserId, profileDetails);
+          return {
+            ...transformedPost,
+            commentsCount: commentCounts[post.id] || 0
+          };
+        }) || [];
       } catch (error) {
-        console.error('error fetching profile posts:', error);
-        throw error;
-      }
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-};
-
-export const useSavedPosts = (userId: string) => {
-  const supabase = createClient();
-  
-  return useQuery({
-    queryKey: ['savedPosts', userId],
-    enabled: !!userId,
-    queryFn: async (): Promise<PostType[]> => {
-      try {
-        const { data: userData, error: userError } = await supabase
-          .from('profiles')
-          .select('saved_posts')
-          .eq('id', userId)
-          .single();
-          
-        if (userError || !userData?.saved_posts?.length) {
-          return [];
-        }
-        
-        const { data: savedPostsData, error: savedPostsError } = await supabase
-          .from("posts")
-          .select("*")
-          .in("id", userData.saved_posts)
-          .order("created_at", { ascending: false });
-            
-        if (savedPostsError || !savedPostsData) {
-          console.error("error fetching saved posts:", savedPostsError);
-          return [];
-        }
-
-        const savedPosts = await Promise.all(savedPostsData.map(async (post) => {
-          const { data: postUserData } = await supabase
-            .from('profiles')
-            .select('full_name, avatar_url')
-            .eq('id', post.user_id)
-            .single();
-            
-          return transformPostData(post, userId, {
-            full_name: postUserData?.full_name,
-            avatar_url: postUserData?.avatar_url
-          });
-        }));
-        
-        return savedPosts.map(post => ({ ...post, saved: true }));
-      } catch (error) {
-        console.error('error fetching saved posts:', error);
         throw error;
       }
     },

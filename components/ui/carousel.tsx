@@ -73,17 +73,35 @@ const Carousel = React.forwardRef<
         return
       }
 
-      setCanScrollPrev(api.canScrollPrev())
-      setCanScrollNext(api.canScrollNext())
+      try {
+        setCanScrollPrev(api.canScrollPrev())
+        setCanScrollNext(api.canScrollNext())
+      } catch (error) {
+        console.error("Error updating carousel navigation state:", error)
+      }
     }, [])
 
     const scrollPrev = React.useCallback(() => {
-      api?.scrollPrev()
-    }, [api])
+      if (!api) return
+      try {
+        api.scrollPrev()
+        // Force select event to ensure state updates
+        onSelect(api)
+      } catch (error) {
+        console.error("Error scrolling carousel to previous:", error)
+      }
+    }, [api, onSelect])
 
     const scrollNext = React.useCallback(() => {
-      api?.scrollNext()
-    }, [api])
+      if (!api) return
+      try {
+        api.scrollNext()
+        // Force select event to ensure state updates
+        onSelect(api)
+      } catch (error) {
+        console.error("Error scrolling carousel to next:", error)
+      }
+    }, [api, onSelect])
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -103,7 +121,11 @@ const Carousel = React.forwardRef<
         return
       }
 
-      setApi(api)
+      try {
+        setApi(api)
+      } catch (error) {
+        console.error("Error setting carousel API:", error)
+      }
     }, [api, setApi])
 
     React.useEffect(() => {
@@ -111,12 +133,21 @@ const Carousel = React.forwardRef<
         return
       }
 
-      onSelect(api)
-      api.on("reInit", onSelect)
-      api.on("select", onSelect)
+      try {
+        onSelect(api)
+        api.on("reInit", onSelect)
+        api.on("select", onSelect)
 
-      return () => {
-        api?.off("select", onSelect)
+        return () => {
+          try {
+            api.off("select", onSelect)
+            api.off("reInit", onSelect)
+          } catch (error) {
+            console.error("Error removing carousel event listener:", error)
+          }
+        }
+      } catch (error) {
+        console.error("Error initializing carousel events:", error)
       }
     }, [api, onSelect])
 
@@ -206,9 +237,9 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute  h-8 w-8 rounded-full",
+        "absolute h-8 w-8 rounded-full",
         orientation === "horizontal"
-          ? "-left-12 top-1/2 -translate-y-1/2"
+          ? "left-2 top-1/2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
@@ -237,7 +268,7 @@ const CarouselNext = React.forwardRef<
       className={cn(
         "absolute h-8 w-8 rounded-full",
         orientation === "horizontal"
-          ? "-right-12 top-1/2 -translate-y-1/2"
+          ? "right-2 top-1/2 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
