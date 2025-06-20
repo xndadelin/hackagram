@@ -46,10 +46,8 @@ export const useLikePost = () => {
     },
     
     onSuccess: (data, variables) => {
-      // Invalidate all query keys that might contain this post
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       
-      // Specific invalidation for the profile posts - this includes the userId now
       queryClient.invalidateQueries({
         queryKey: ['profilePosts'],
         exact: false, 
@@ -59,7 +57,6 @@ export const useLikePost = () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       queryClient.invalidateQueries({ queryKey: ['savedPosts'] });
       
-      // Optimistically update any posts in the cache
       queryClient.setQueriesData({ queryKey: ['posts'] }, (oldData: any) => {
         if (!oldData) return oldData;
         
@@ -80,7 +77,6 @@ export const useLikePost = () => {
         return oldData;
       });
       
-      // Update profile posts cache for any queryKey that starts with profilePosts
       queryClient.setQueriesData({ predicate: (query) => {
         return Array.isArray(query.queryKey) && query.queryKey[0] === 'profilePosts';
       }}, (oldData: any) => {
@@ -103,7 +99,6 @@ export const useLikePost = () => {
         return oldData;
       });
       
-      // Update saved posts cache
       queryClient.setQueriesData({ queryKey: ['savedPosts'] }, (oldData: any) => {
         if (!oldData) return oldData;
         

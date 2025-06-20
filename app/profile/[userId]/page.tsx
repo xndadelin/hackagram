@@ -11,6 +11,7 @@ import { useLikePost } from "@/utils/mutations/likePost";
 import { useProfile } from "@/utils/queries/getProfile";
 import { useProfilePosts, useSavedPosts } from "@/utils/queries/getPosts";
 import { HeartButton } from "@/components/HeartButton";
+import { PostDialog } from "@/components/PostDialog";
 import Link from "next/link";
 
 
@@ -28,6 +29,7 @@ export default function UserProfile() {
   );
   
   const [activeTab, setActiveTab] = useState("posts");
+  const [openPostId, setOpenPostId] = useState<string | null>(null);
   
   const loading = isProfileLoading || isProfilePostsLoading || 
     (activeTab === 'saved' && currentUserData?.user?.id === profileId && isSavedPostsLoading);
@@ -181,31 +183,53 @@ export default function UserProfile() {
                 {profilePosts.length > 0 ? (
                   <div className="grid grid-cols-3 gap-1 md:gap-4 mt-4">
                     {profilePosts.map(post => (
-                      <div key={post.id} className="aspect-square bg-muted relative group overflow-hidden">
-                        <img 
-                          src={post.fileUrls?.[0] || "https://assets.hackclub.com/flag-standalone.svg"} 
-                          alt="Post" 
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = "https://assets.hackclub.com/flag-standalone.svg";
-                            e.currentTarget.className = "w-full h-full object-contain p-4";
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4 text-white">
-                          <div className="flex items-center">                            <HeartButton 
-                              size={20} 
-                              initialState={!!post.liked}
-                              onToggle={(isLiked) => handleLike(post.id, isLiked)}
-                              key={`heart-${post.id}-${String(post.liked)}-${Date.now()}`} // Extra measure to force re-render
-                            />
-                            <span className="ml-1">{post.likeCount}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <MessageCircle className="h-5 w-5" />
-                            <span className="ml-1">0</span>
-                          </div>
+                        <div key={post.id} className="aspect-square bg-muted relative group overflow-hidden cursor-pointer">
+                          <PostDialog 
+                            post={post} 
+                            onLikeToggle={handleLike}
+                            open={openPostId === post.id}
+                            onOpenChange={(isOpen) => setOpenPostId(isOpen ? post.id : null)}
+                          >
+                            <div 
+                              className="w-full h-full"
+                              onClick={() => setOpenPostId(post.id)}
+                            >
+                              <img 
+                                src={post.fileUrls?.[0] || "https://assets.hackclub.com/flag-standalone.svg"} 
+                                alt="Post" 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src = "https://assets.hackclub.com/flag-standalone.svg";
+                                  e.currentTarget.className = "w-full h-full object-contain p-4";
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4 text-white">
+                                <div className="flex items-center">                            
+                                  <HeartButton 
+                                    size={20} 
+                                    initialState={!!post.liked}
+                                    onToggle={(isLiked) => {
+                                      if (event) event.stopPropagation();
+                                      handleLike(post.id, isLiked);
+                                    }}
+                                    key={`heart-${post.id}-${String(post.liked)}-${Date.now()}`} 
+                                  />
+                                  <span className="ml-1">{post.likeCount}</span>
+                                </div>
+                                <div 
+                                  className="flex items-center cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenPostId(post.id);
+                                  }}
+                                >
+                                  <MessageCircle className="h-5 w-5" />
+                                  <span className="ml-1">0</span>
+                                </div>
+                              </div>
+                            </div>
+                          </PostDialog>
                         </div>
-                      </div>
                     ))}
                   </div>
                 ) : (
@@ -244,7 +268,7 @@ export default function UserProfile() {
                               size={20} 
                               initialState={!!post.liked} 
                               onToggle={(isLiked) => handleLike(post.id, isLiked)}
-                              key={`heart-saved-${post.id}-${String(post.liked)}-${Date.now()}`} // Extra measure to force re-render
+                              key={`heart-saved-${post.id}-${String(post.liked)}-${Date.now()}`}
                             />
                             <span className="ml-1">{post.likeCount}</span>
                           </div>

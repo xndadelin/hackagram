@@ -6,6 +6,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MessageCircle, Bookmark, Share2, MoreHorizontal } from "lucide-react";
 import { Post } from '@/components/Post';
+import { PostDialog } from '@/components/PostDialog';
 import { HeartButton } from '@/components/HeartButton';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -23,6 +24,7 @@ export default function Home() {
     liked?: boolean;
     likeCount?: number;
     likes?: string[];
+    commentsCount?: number;
     profiles?: {
       full_name?: string; 
       avatar_url?: string;
@@ -49,6 +51,19 @@ export default function Home() {
           const filteredPosts = data.filter(post => {
             return post.user_id === userData.user?.id;
           });
+
+          const { data: commentsData, error: commentsError } = await supabase
+            .from('comments')
+            .select('post_id')
+            .in('post_id', filteredPosts.map(post => post.id));
+
+          const commentCounts: Record<string, number> = {};
+          if (commentsData) {
+            commentsData.forEach((comment: { post_id: string }) => {
+              commentCounts[comment.post_id] = (commentCounts[comment.post_id] || 0) + 1;
+            });
+          }
+          
             
           const transformedPosts = filteredPosts.map(post => {
             const fileUrls: string[] = post.files?.map((file: string) => 
@@ -65,7 +80,8 @@ export default function Home() {
               profiles: {
                 full_name: userData.user?.user_metadata?.full_name,
                 avatar_url: userData.user?.user_metadata?.avatar_url
-              }
+              },
+              commentsCount: commentCounts[post.id] || 0
             };
           });
           
@@ -212,9 +228,11 @@ export default function Home() {
                                 onToggle={(isLiked) => handleLike(post.id, isLiked)}
                               />
                             </Button>
-                            <Button variant="ghost" size="icon" className="rounded-full">
-                              <MessageCircle className="h-6 w-6" />
-                            </Button>
+                            <PostDialog post={post} onLikeToggle={(postId, liked) => handleLike(postId, liked)}>
+                              <Button variant="ghost" size="icon" className="rounded-full">
+                                <MessageCircle className="h-6 w-6" />
+                              </Button>
+                            </PostDialog>
                             <Button variant="ghost" size="icon" className="rounded-full">
                               <Share2 className="h-6 w-6" />
                             </Button>
@@ -231,13 +249,19 @@ export default function Home() {
                         </div>
                         
                         <p className="font-medium text-sm mb-1">
-                          {post.likeCount} {post.likeCount === 1 ? 'like' : 'likes'}
+                          <span>{post.likeCount || 0} {post.likeCount === 1 ? 'like' : 'likes'}</span>
+                          {(post.commentsCount ?? 0) > 0 && (
+                            <span className="ml-2 text-muted-foreground">•</span>
+                          )}
+                          {(post.commentsCount ?? 0) > 0 && (
+                            <span className="ml-2">{post.commentsCount} {post.commentsCount === 1 ? 'comment' : 'comments'}</span>
+                          )}
                         </p>
                         
                         {post.caption && (
                           <div className="mb-2">
                             <span className="font-medium text-sm mr-1">
-                              {post.profiles?.full_name || 'User'}
+                              {post.profiles?.full_name}
                             </span>
                             <span className="text-sm">{post.caption}</span>
                           </div>

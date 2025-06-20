@@ -97,10 +97,10 @@ export function AppSidebar() {
                     aria-disabled={item.disabled}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-md text-sm w-full",
-                      "transition-all duration-200 group",
+                      "transition-all duration-200",
                       isActive 
                         ? "bg-[#ec3750]/10 text-[#ec3750] font-medium" 
-                        : "hover:bg-[#ec3750]/10 hover:text-[#ec3750]",
+                        : "text-foreground hover:bg-muted hover:text-[#ec3750]",
                       item.disabled && "opacity-50 pointer-events-none"
                     )}
                   >
@@ -108,7 +108,8 @@ export function AppSidebar() {
                       "h-4 w-4",
                       isActive 
                         ? "text-[#ec3750]" 
-                        : "text-muted-foreground group-hover:text-[#ec3750]"
+                        : "text-foreground/60 transition-colors",
+                      !isActive && "hover:text-[#ec3750]"
                     )} />
                     <span>{item.title}</span>
                   </Link>

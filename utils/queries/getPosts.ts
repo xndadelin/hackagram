@@ -12,6 +12,7 @@ export interface PostType {
   likeCount?: number;
   likes?: string[];
   saved?: boolean;
+  commentsCount?: number;
   profiles?: {
     full_name?: string; 
     avatar_url?: string;
